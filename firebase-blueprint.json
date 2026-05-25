@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "bio": { "type": "string" },
+        "morningPerson": { "type": "boolean" },
+        "bedtime": { "type": "string" },
+        "wakeTime": { "type": "string" },
+        "disciplineLevel": { "type": "integer" },
+        "language": { "type": "string", "enum": ["ID", "EN"] },
+        "notificationsEnabled": { "type": "boolean" },
+        "screenTimeGoal": { "type": "integer" }
+      },
+      "required": ["uid"]
+    },
+    "Habit": {
+      "title": "Habit",
+      "description": "Recurring healthy activity or goal",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "frequency": { "type": "string" },
+        "preferredTime": { "type": "string" },
+        "durationMinutes": { "type": "integer" },
+        "category": { "type": "string" }
+      },
+      "required": ["userId", "title"]
+    },
+    "ScheduleItem": {
+      "title": "ScheduleItem",
+      "description": "A specific task or event in time",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "category": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "completed", "missed", "rescheduled"] },
+        "isAIRecommended": { "type": "boolean" }
+      },
+      "required": ["userId", "title", "startTime", "endTime", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/users/{userId}/habits/{habitId}": {
+      "schema": "Habit",
+      "description": "User habits and recurring goals"
+    },
+    "/users/{userId}/schedules/{itemId}": {
+      "schema": "ScheduleItem",
+      "description": "Daily schedule items"
+    }
+  }
+}
