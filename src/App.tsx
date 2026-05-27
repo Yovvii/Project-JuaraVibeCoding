@@ -521,7 +521,6 @@ export default function App() {
   const forceAbsoluteFactoryReset = async () => {
     setIsScheduleLoading(true);
 
-    // A. STEP 1: FIRESTORE REMOTE OBLITERATION (Batch Deletion)
     if (auth.currentUser) {
       try {
         const userId = auth.currentUser.uid;
@@ -536,7 +535,6 @@ export default function App() {
         const targetsQuery = query(collection(db, "users", userId, "targets"));
         const targetsSnap = await getDocs(targetsQuery);
 
-        // Also query 'history' subcollection as listed in prompt: users/{userId}/history/*
         const historyQuery = query(collection(db, "users", userId, "history"));
         const historySnap = await getDocs(historyQuery);
 
@@ -557,7 +555,6 @@ export default function App() {
 
         await batch.commit();
 
-        // Perform aggressive overwrite with { merge: false } as instructed
         const { setDoc, serverTimestamp } = await import("firebase/firestore");
         await setDoc(doc(db, "users", userId), {
           email: auth.currentUser.email || "",
@@ -567,13 +564,12 @@ export default function App() {
           uncompletedTasks: 0,
           screenTimeSeconds: 0,
           lastUpdated: serverTimestamp()
-        }, { merge: false }); // merge: false guarantees the old corrupted fields are completely deleted
+        }, { merge: false });
       } catch (error) {
         console.error("Failed cloud purge during factory reset:", error);
       }
     }
 
-    // B. FRONTEND STATE CLEAR & STEP 2: COMPLETE BROWSER CACHE EVICTION
     setTargets([]);
     setSchedules([]);
     setStreak(0);
@@ -589,19 +585,7 @@ export default function App() {
     } catch (e) {
       console.warn("Storage wipe warn during factory reset:", e);
     }
-
-    // C. STEP 3: FORCE FIREBASE SIGNOUT & TOTAL HARD RELOAD
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error("Failed signOut during factory reset:", error);
-    }
-
-    window.location.replace(window.location.origin);
-  };
-
-  const resetAllSchedules = async () => {
-    await forceAbsoluteFactoryReset();
+    setIsScheduleLoading(false);
   };
 
   const resetDailySchedule = async () => {
@@ -1356,8 +1340,6 @@ export default function App() {
                    lang={lang} 
                    isDarkMode={isDarkMode}
                    onToggleDarkMode={toggleDarkMode}
-                   onResetAllSchedules={resetAllSchedules}
-                   onForceAbsoluteFactoryReset={forceAbsoluteFactoryReset}
                  />
               </motion.div>
             )}

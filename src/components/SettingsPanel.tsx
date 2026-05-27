@@ -17,8 +17,6 @@ interface SettingsPanelProps {
   lang: 'ID' | 'EN';
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
-  onResetAllSchedules?: () => void;
-  onForceAbsoluteFactoryReset: () => Promise<void>;
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -32,9 +30,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onClearHistory, 
   lang, 
   isDarkMode, 
-  onToggleDarkMode,
-  onResetAllSchedules,
-  onForceAbsoluteFactoryReset
+  onToggleDarkMode
 }) => {
   const t = translations[lang];
   const { manualResetScreenTime } = useScreenTime();
@@ -42,8 +38,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const [isLangDropdownOpen, setIsLangDropdownOpen] = React.useState(false);
   const [isCredentialSheetOpen, setIsCredentialSheetOpen] = React.useState(false);
   const [savedAccounts, setSavedAccounts] = React.useState<any[]>([]);
-  const [isScreenTimeResetDescExpanded, setIsScreenTimeResetDescExpanded] = React.useState(false);
-  const [isAllSchedulesResetDescExpanded, setIsAllSchedulesResetDescExpanded] = React.useState(false);
 
   React.useEffect(() => {
     try {
@@ -353,73 +347,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <div className={cn("absolute top-1 w-6 h-6 bg-white rounded-full transition-all", isDarkMode ? 'left-7' : 'left-1')} />
                 </button>
               </div>
-
-              {/* Manual Waktu Layar Reset */}
-              <div className={cn("p-6 rounded-3xl border shadow-sm flex items-center justify-between", cardBg)}>
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-colors duration-300 bg-red-100 dark:bg-red-950/20 text-red-500")}>
-                    <RotateCcw size={21} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <button
-                      onClick={() => setIsScreenTimeResetDescExpanded(!isScreenTimeResetDescExpanded)}
-                      className="flex items-center gap-1.5 hover:text-theme-accent transition-colors text-left"
-                    >
-                      <span className="font-sans font-black text-sm">{lang === "ID" ? "Atur Ulang Waktu" : "Reset Screen Time"}</span>
-                      {isScreenTimeResetDescExpanded ? <ChevronUp size={14} className="opacity-60 shrink-0" /> : <ChevronDown size={14} className="opacity-60 shrink-0" />}
-                    </button>
-                    {isScreenTimeResetDescExpanded && (
-                      <p className={cn(textBody, "text-xs mt-1", textSecondary)}>{lang === "ID" ? "Mereset total seluruh data waktu layar, aktivitas, kebiasaan, dan statistik secara permanen." : "Resets active screen time, habits and stats databases completely."}</p>
-                    )}
-                  </div>
-                </div>
-                 <button
-                  onClick={async () => {
-                    const confirmMsg = lang === "ID" 
-                      ? "Apakah Anda yakin ingin menghapus seluruh data? Semua target, jadwal, statistik, dan waktu layar akan dihapus permanen dari cloud."
-                      : "Are you sure you want to hard reset all data? This will permanently wipe all targets, schedules, stats, and screen time off the cloud database.";
-                    if (window.confirm(confirmMsg)) {
-                      await onForceAbsoluteFactoryReset();
-                    }
-                  }}
-                  className="px-4 py-2 border border-red-500/20 bg-red-500/10 hover:bg-red-500 hover:text-white rounded-xl transition-all font-sans font-black text-xs text-red-500 cursor-pointer active:scale-95 ml-4 shrink-0"
-                >
-                  {lang === "ID" ? "Atur" : "Reset"}
-                </button>
-              </div>
-
-              {/* Reset All Schedules */}
-              {onResetAllSchedules && (
-                <div className={cn("p-6 rounded-3xl border shadow-sm flex items-center justify-between mt-4", cardBg)}>
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-colors duration-300 bg-red-100 dark:bg-red-950/20 text-red-500")}>
-                      <Trash2 size={21} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <button
-                        onClick={() => setIsAllSchedulesResetDescExpanded(!isAllSchedulesResetDescExpanded)}
-                        className="flex items-center gap-1.5 hover:text-theme-accent transition-colors text-left"
-                      >
-                        <span className="font-sans font-black text-sm">{lang === "ID" ? "Atur Ulang Jadwal" : "Reset All Schedules"}</span>
-                        {isAllSchedulesResetDescExpanded ? <ChevronUp size={14} className="opacity-60 shrink-0" /> : <ChevronDown size={14} className="opacity-60 shrink-0" />}
-                      </button>
-                      {isAllSchedulesResetDescExpanded && (
-                        <p className={cn(textBody, "text-xs mt-1", textSecondary)}>{lang === "ID" ? "Menghapus semua data jadwal dari sistem" : "Permanently wipe all schedules from database"}</p>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={async () => {
-                      if (window.confirm(lang === "ID" ? "Apakah Anda yakin ingin menghapus semua jadwal?" : "Are you sure you want to completely reset all schedules?")) {
-                        await onForceAbsoluteFactoryReset();
-                      }
-                    }}
-                    className="px-4 py-2 border border-red-500/20 bg-red-500/10 hover:bg-red-500 hover:text-white rounded-xl transition-all font-sans font-black text-xs text-red-500 cursor-pointer active:scale-95 ml-4 shrink-0"
-                  >
-                    {lang === "ID" ? "Sapu" : "Wipe"}
-                  </button>
-                </div>
-              )}
            </div>
         </div>
 
@@ -498,7 +425,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                          </button>
                          <button 
                            onClick={onClearHistory}
-                           className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-[10px] font-sans font-black uppercase tracking-widest transition-all flex items-center gap-2 cursor-pointerSB"
+                           className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-[10px] font-sans font-black uppercase tracking-widest transition-all flex items-center gap-2 cursor-pointer"
                          >
                            <Trash2 size={14} /> Clear All
                          </button>
